@@ -21,6 +21,18 @@ if __name__ == '__main__':
 
     s.connect((h, args.port))
 
-    print(s.recv(1024).decode())
+    try:
+        while True:
+            word:str = None
+            # print what the server sent over
+            print('Please enter the word that you need defined:')
+            word = input().strip().lower()
+            s.send(word.encode())
 
-    s.close()
+
+            definition:str = s.recv(4096).decode()
+
+            print(f'Server replied: {definition}')
+    except KeyboardInterrupt:
+        s.close()
+        exit(0)
