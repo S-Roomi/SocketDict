@@ -8,7 +8,7 @@ DICTIONARY:dict = None
 def find_definition(word:str):
     return str(DICTIONARY.get(word, "Could not find definition."))
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', required=True, help='ip is the ip address the server should look to')
     args = parser.parse_args()
@@ -65,3 +65,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         s.close()
         exit(0)
+
+if __name__ == '__main__':
+    main()
