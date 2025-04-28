@@ -1,8 +1,7 @@
 import socket
 import argparse
 
-
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', required=True, type=str, help='ip is the ip address the server is running on')
     parser.add_argument('--port', required=True, type=int,help="the port the server is running on")
@@ -36,3 +35,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         s.close()
         exit(0)
+
+
+if __name__ == '__main__':
+    main()
