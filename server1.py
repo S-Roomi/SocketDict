@@ -21,7 +21,7 @@ def find_definition(word:str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ip', required=True, help='the ip address the server should look to')
+    parser.add_argument('--ip', required=True, help='The ip address the server should look to')
     args = parser.parse_args()
 
 
@@ -29,15 +29,15 @@ if __name__ == '__main__':
     # attempt to create socket
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
-        print('socket was created successfully')
+        print('Socket was created successfully')
     except socket.error:
-        print(f'socket failed to create. Error {socket.error}')
+        print(f'Socket failed to create. Error {socket.error}')
         exit(-1)
 
     # bind the socket to the passed ip
     try:
         s.bind((args.ip, PORT))
-        print(f'socket was bind to {args.ip}')
+        print(f'Socket was bind to {args.ip}')
     except socket.error:
         print(f'Bind failed. Error {socket.error}')
         s.close()
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         while True:
             # accept new client
             connection, address = s.accept()
-            print('got connection from ', address)
+            print('Got connection from ', address)
             
             # handle client
             try:

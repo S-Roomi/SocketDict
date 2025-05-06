@@ -22,7 +22,7 @@ def find_definition(word:str):
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ip', required=True, help='the ip address the server should look to')
+    parser.add_argument('--ip', required=True, help='The ip address the server should look to')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -31,15 +31,15 @@ if __name__ == '__main__':
     # attempt to create socket
     try:
         server_socket = s.socket(s.AF_INET, s.SOCK_STREAM, s.IPPROTO_TCP)
-        print('socket was created successfully')
+        print('Socket was created successfully')
     except s.error:
-        print(f'socket failed to create. Error {s.error}')
+        print(f'Socket failed to create. Error {s.error}')
         exit(-1)
 
     # bind the socket to the passed ip
     try:
         server_socket.bind((args.ip, PORT))
-        print(f'socket was bind to {args.ip}')
+        print(f'Socket was bind to {args.ip}')
     except s.error:
         print(f'Bind failed. Error {s.error}')
         server_socket.close()
@@ -76,14 +76,15 @@ if __name__ == '__main__':
                     sockets_list.append(connection)
                     clients[connection] = address
 
-                    print(f"Accepted new connection from {address}")
+                    print(f"Got connection from {address}")
                 else:
                     # handle client
                     try: 
                         word = socket.recv(4096).decode()
 
                         if not word:
-                            print(f"Connection closed by {clients[socket]}")
+                            print(f"Client {clients[socket]} sent empty word ")
+                            
                             sockets_list.remove(socket)
                             del clients[socket]
                             socket.close()
