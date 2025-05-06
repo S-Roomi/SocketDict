@@ -55,7 +55,7 @@ if __name__ == '__main__':
         exit(-1)
     
     
-    connection = None
+
     #create a list of sockets
     sockets_list = [server_socket]
 
