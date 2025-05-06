@@ -21,7 +21,7 @@ def find_definition(word:str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ip', required=True, help='ip is the ip address the server should look to')
+    parser.add_argument('--ip', required=True, help='the ip address the server should look to')
     args = parser.parse_args()
 
 
