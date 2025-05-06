@@ -2,13 +2,20 @@ import socket
 import argparse
 import json
 import os
-import sys
 import signal
 
+#Port address. Can change to whatever fits your needs
 PORT = 10000
+
+# Dict to store Dictionary
 DICTIONARY:dict = None
 
-with open('dictionary.json', 'r') as json_file:
+# I assume the dictionary file will be in the same working directory as the server files. If not, you can 
+# change the variable below to whatever to fit your needs.
+DICTIONARY_DIRECTORY:str = 'dictionary.json'
+
+# Open given dictionary and store the json file in DICTIONARY
+with open(DICTIONARY_DIRECTORY, 'r') as json_file:
     DICTIONARY = json.load(json_file)
 
 # Didn't use signum or frame but they are required to be in the function definition.
@@ -23,31 +30,37 @@ def handle_child(signum, frame) -> None:
             break
 
 def find_definition(word:str) -> str:
+    # return a dictionary search of a word. If nothing was found, return "Could not find definition".
     return str(DICTIONARY.get(word, "Could not find definition."))
 
 def handle_client(connection, address) -> None:
+    # this is the same code as in server 1. Put it into a function so I can pass it as parameter in signal.signal
     try:
         while True:
-            word:str = connection.recv(4096).decode()
+            word:str = None
+            word = connection.recv(4096)
+
             if not word:
                 print(f'Client {address} disconnected.')
+                connection.close()
                 break
 
-            print(word)
+            word = word.decode()
+
+            print(f"Received word from {address}: {word}")
             definition:str = find_definition(word)
             connection.send(definition.encode())
-    except Exception as exception:
-        print(f"[CHILD] Error: {exception}")
-    finally:
+    except Exception:
+        print(f"Connection to {address} closed")
         connection.close()
-        os._exit(0)
 
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', required=True, help='ip is the ip address the server should look to')
     return parser.parse_args()
 
-def main():
+
+if __name__ == '__main__':
     args = get_arguments()
 
     # prepare for when the os sends the server a signal that a child process as finished. 
@@ -60,7 +73,7 @@ def main():
         print('socket was created successfully')
     except socket.error:
         print(f'socket failed to create. Error {socket.error}')
-        sys.exit(-1)
+        exit(-1)
 
     # bind the socket to the passed ip
     try:
@@ -69,7 +82,7 @@ def main():
     except socket.error:
         print(f'Bind failed. Error {socket.error}')
         s.close()
-        sys.exit(-1)
+        exit(-1)
 
     # tell the socket to listen
     try:
@@ -78,25 +91,22 @@ def main():
     except socket.error:
         print(f'Listen failed. Error {socket.error}')
         s.close()
-        sys.exit(-1)
+        exit(-1)
+
     connection:socket = None
 
     try:
         while True:
             connection, address = s.accept()
             print('got connection from ', address)
+
             pid = os.fork()
 
             if pid == 0:
-                # close 
-                s.close()
                 handle_client(connection, address)
             else:
                 connection.close()
     except KeyboardInterrupt:
-        print("Connection closed")
+        # close the socket created in parent process
         s.close()
-        sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+        exit(0)

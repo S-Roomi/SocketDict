@@ -3,18 +3,28 @@ import argparse
 import json
 
 PORT = 10000
+# Dict to store Dictionary
 DICTIONARY:dict = None
 
+# I assume the dictionary file will be in the same working directory as the server files. If not, you can 
+# change the variable below to whatever to fit your needs.
+DICTIONARY_DIRECTORY:str = 'dictionary.json'
+
+# Open given dictionary and store the json file in DICTIONARY
+with open(DICTIONARY_DIRECTORY, 'r') as json_file:
+    DICTIONARY = json.load(json_file)
+
 def find_definition(word:str):
+    # return a dictionary search of a word. If nothing was found, return "Could not find definition"
     return str(DICTIONARY.get(word, "Could not find definition."))
 
-def main():
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', required=True, help='ip is the ip address the server should look to')
     args = parser.parse_args()
 
-    with open('dictionary.json', 'r') as json_file:
-        DICTIONARY = json.load(json_file)
+
 
     # attempt to create socket
     try:
@@ -33,9 +43,9 @@ def main():
         s.close()
         exit(-1)
 
-    # tell the socket to listen
+    # tell the socket to listen and have no backlog
     try:
-        s.listen(5)
+        s.listen(0)
         print(f'Socket is now listening')
     except socket.error:
         print(f'Listen failed. Error {socket.error}')
@@ -44,27 +54,32 @@ def main():
     connection:socket = None
     try:
         while True:
+            # accept new client
             connection, address = s.accept()
             print('got connection from ', address)
-
-            while True:
-                word:str = None
-                word = connection.recv(4096)
-
-                word = word.decode()
-                if not word:
-                    print(f'Client {address} disconnected.')
-                    break
-
-                print(word)
-                definition:str = find_definition(word)
-                connection.send(definition.encode())
             
-            s.close()
-            print("Connection closed")
-    except KeyboardInterrupt:
+            # handle client
+            try:
+                while True:
+
+                    word:str = None
+                    word = connection.recv(4096)
+
+                    if not word:
+                        print(f'Client {address} disconnected.')
+                        connection.close()
+                        break
+
+                    word = word.decode()
+
+                    print(word)
+                    definition:str = find_definition(word)
+                    connection.send(definition.encode())
+            except Exception:
+                # if some error happens, close the connection
+                print(f"Connection to {address} closed")
+                connection.close()
+                     
+    except KeyboardInterrupt: # handle keyboard interrupt ^C
         s.close()
         exit(0)
-
-if __name__ == '__main__':
-    main()

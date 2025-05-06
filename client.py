@@ -1,7 +1,8 @@
 import socket
 import argparse
 
-def main():
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', required=True, type=str, help='ip is the ip address the server is running on')
     parser.add_argument('--port', required=True, type=int,help="the port the server is running on")
@@ -18,24 +19,30 @@ def main():
         print(f'socket call failed. Error {socket.error}')
 
 
-    s.connect((h, args.port))
+    try:
+        s.connect((h, args.port))
+    except socket.error as error:
+        print("connect() failed: ", error)
+        exit(-1)
 
     try:
         while True:
-            word:str = None
-            # print what the server sent over
-            print('Please enter the word that you need defined:')
-            word = input().strip().lower()
+
+            word = input('Please enter the word that you need defined: ').strip().lower()
+            
+            if not word:
+                print('Empty input.')
+                break
+
             s.send(word.encode())
 
 
             definition:str = s.recv(4096).decode()
+            if not definition:
+                print('Server closed connection')
+
 
             print(f'Server replied: {definition}')
     except KeyboardInterrupt:
         s.close()
         exit(0)
-
-
-if __name__ == '__main__':
-    main()
